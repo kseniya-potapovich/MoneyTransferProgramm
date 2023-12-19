@@ -8,8 +8,7 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        TransferReader transferReader = new TransferReader();
-        List<Transfer> transfer = transferReader.parseTransfersFromDirectory("D:\\Courses\\MoneyTransferProgramm\\src\\input");
-        System.out.println(transfer);
+
+
     }
 }

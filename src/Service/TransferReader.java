@@ -18,7 +18,7 @@ public class TransferReader {
 
         if (files != null) {
             for (File file : files) {
-                if (file.isFile()) {
+                if (file.isFile() && file.getName().endsWith(".txt")) {
                     List<Transfer> fileTransfers = parseTransfersFromFile(file.getAbsolutePath());
                     transfers.addAll(fileTransfers);
                 }

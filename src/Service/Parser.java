@@ -1,6 +1,7 @@
 package Service;
 
 import Models.Account;
+import Models.Transfer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +20,8 @@ import java.util.List;
 public class Parser {
     private AccountReader accountReader = new AccountReader();
     private List<Account> accounts = accountReader.readAccounts("D:\\Courses\\MoneyTransferProgramm\\src\\accounts.txt");
+    private TransferReader transferReader = new TransferReader();
+    private List<Transfer> transfer = transferReader.parseTransfersFromDirectory("D:\\Courses\\MoneyTransferProgramm\\src\\input");
 
     public void parse() {
         File input = new File("D:\\Courses\\MoneyTransferProgramm\\src\\input");

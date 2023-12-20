@@ -1,34 +1,39 @@
 package Models;
 
+import java.time.LocalDateTime;
+
 public class Transfer {
-    private String numberFromAccount;
-    private String numberToAccount;
-    private int amount;
+    private String fileName;
+    private String status;
+    private LocalDateTime dateTime;
 
-    public Transfer(String numberFromAccount, String numberToAccount, int amount) {
-        this.numberFromAccount = numberFromAccount;
-        this.numberToAccount = numberToAccount;
-        this.amount = amount;
+    public Transfer(String fileName, String status, LocalDateTime dateTime) {
+        this.fileName = fileName;
+        this.status = status;
+        this.dateTime = dateTime;
     }
 
-    public String getNumberFromAccount() {
-        return numberFromAccount;
+    public String getFileName() {
+        return fileName;
     }
 
-    public String getNumberToAccount() {
-        return numberToAccount;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public int getAmount() {
-        return amount;
+    public String getStatus() {
+        return status;
     }
 
-    @Override
-    public String toString() {
-        return "Transfer{" +
-                "numberFromAccount='" + numberFromAccount + '\'' +
-                ", numberToAccount='" + numberToAccount + '\'' +
-                ", amount=" + amount +
-                '}';
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 }

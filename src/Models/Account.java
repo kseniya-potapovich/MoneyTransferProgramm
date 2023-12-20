@@ -6,30 +6,26 @@ import java.io.IOException;
 
 public class Account {
     private String number;
-    private int balance;
+    private int amount;
 
-    public Account(String number, int balance) {
+    public Account(String number, int amount) {
         this.number = number;
-        this.balance = balance;
+        this.amount = amount;
     }
 
     public String getNumber() {
         return number;
     }
 
-    public int getBalance() {
-        return balance;
+    public void setNumber(String number) {
+        this.number = number;
     }
 
-    public void setBalance(int balance) {
-        this.balance = balance;
+    public int getAmount() {
+        return amount;
     }
 
-    @Override
-    public String toString() {
-        return "Account{" +
-                "number='" + number + '\'' +
-                ", balance=" + balance +
-                '}';
+    public void setAmount(int amount) {
+        this.amount = amount;
     }
 }

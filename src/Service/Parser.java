@@ -1,90 +1,97 @@
 package Service;
 
+import Exceptions.InvalidTransferException;
 import Models.Account;
 import Models.Transfer;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
-public class Parser {
-    private AccountReader accountReader = new AccountReader();
-    private List<Account> accounts = accountReader.readAccounts("D:\\Courses\\MoneyTransferProgramm\\src\\accounts.txt");
-    private TransferReader transferReader = new TransferReader();
-    private List<Transfer> transfer = transferReader.parseTransfersFromDirectory("D:\\Courses\\MoneyTransferProgramm\\src\\input");
-
-    public void parse() {
-        File input = new File("D:\\Courses\\MoneyTransferProgramm\\src\\input");
-        File[] files = input.listFiles();
-
-        if (files == null || files.length == 0) {
-            System.out.println("Нет файлов для парсинга.");
-            return;
-        }
+public class Parser  {
+    private static final String INPUT = "D:\\Courses\\MoneyTransferProgramm\\src\\input";
+    private static final String ARCHIVE = "D:\\Courses\\MoneyTransferProgramm\\src\\archive";
 
 
-        for (File file : files) {
-            if (!file.getName().endsWith(".txt")) {
-                continue;
-            }
-            try (FileReader fileReader = new FileReader(file);
-                 BufferedReader bufferedReader = new BufferedReader(fileReader)) {
-                String line = null;
-                String[] fields = new String[0];
-                while ((line = bufferedReader.readLine()) != null) {
-                    fields = line.split("\\|");
+    private List<Account> accounts;
 
-
-                    String numberFromAccount = fields[0].trim();
-                    String numberToAccount = fields[1].trim();
-                    int amount = Integer.parseInt(fields[2].trim());
-
-                    if (!isValidAccount(numberFromAccount) || !isValidAccount(numberToAccount)) {
-                        System.out.println("Number of account isn't valid " + line);
-                        continue;
-                    }
-                    if (amount <= 0) {
-                        System.out.println("Insufficient funds " + line);
-                        continue;
-                    }
-
-                    Account fromAccount = getAccount(numberFromAccount);
-                    Account toAccount = getAccount(numberToAccount);
-
-                    if (fromAccount == null || toAccount == null) {
-                        System.out.println("Account isn't exists " + line);
-                        continue;
-                    }
-                    if (fromAccount.getBalance() < toAccount.getBalance()) {
-                        System.out.println("Insufficient funds " + line);
-                        continue;
-                    }
-
-                    fromAccount.setBalance(fromAccount.getBalance() - amount);
-                    toAccount.setBalance(toAccount.getBalance() + amount);
-
-//                    archiveFile(file);
-                }
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-        }
-
-        updateFile();
+    public Parser() {
+        accounts = new ArrayList<>();
     }
 
-    private boolean isValidAccount(String accountNumber) {
-        return accountNumber.matches("\\d{5}-\\d{5}");
+
+    public void parse() {
+        File input = new File(INPUT);
+        File[] files = input.listFiles();
+
+        if (files != null){
+            for (File file : files){
+                if (file.isFile() && file.getName().endsWith(".txt")){
+                    try {
+                        Scanner scanner = new Scanner(file);
+                        while (scanner.hasNextLine()){
+                            String line = scanner.nextLine();
+                            String[] parts = line.split("\\|");
+                            if (parts.length == 3){
+                                String fromAccountNumber = parts[0];
+                                String toAccountNumber = parts[1];
+                                int amount = Integer.parseInt(parts[2]);
+
+                                Account fromAccount = getAccount(fromAccountNumber);
+                                Account toAccount = getAccount(toAccountNumber);
+
+                                if (fromAccount.getAmount() < amount){
+                                    CreateReport.createReport(file.getName(), line,false);
+                                }
+
+                                if (!isValidAccountNumber(fromAccountNumber) || !isValidAccountNumber(toAccountNumber)){
+                                    CreateReport.createReport(file.getName(), line,false);
+                                    continue;
+                                }
+                                if (amount <= 0) {
+                                    CreateReport.createReport(file.getName(), line, false);
+                                    continue;
+                                }
+
+                                UpdateAccount.updateAccount(fromAccountNumber, -amount);
+                                UpdateAccount.updateAccount(toAccountNumber, amount);
+
+                                CreateReport.createReport(file.getName(), line, true);
+                            }else {
+                                CreateReport.createReport(file.getName(), line,false);
+                            }
+                        }
+                        scanner.close();
+                        moveFileToArchive(file);
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+    }
+    private static void moveFileToArchive(File file)  {
+        try{
+            Path sourcePath = file.toPath();
+            Path targetPath = Path.of(ARCHIVE, file.getName());
+            Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private static boolean isValidAccountNumber(String accountNumber) {
+        String regex = "\\d{5}-\\d{5}";
+        return Pattern.matches(regex, accountNumber);
     }
 
     private Account getAccount(String accountNumber) {
@@ -95,25 +102,4 @@ public class Parser {
         }
         return null;
     }
-
-    private void updateFile() {
-        try (FileWriter fileWriter = new FileWriter("D:\\Courses\\MoneyTransferProgramm\\src\\accounts.txt")) {
-            for (Account account : accounts) {
-                fileWriter.write(account.getNumber() + " " + account.getBalance());
-                fileWriter.flush();
-            }
-        } catch (IOException e) {
-            System.out.println(e);
-        }
-    }
-
-   /* private void archiveFile(File file) {
-        try {
-            Path source = file.toPath();
-            Path destination = Path.of("archive", file.getName());
-            Files.move(source, destination, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 }

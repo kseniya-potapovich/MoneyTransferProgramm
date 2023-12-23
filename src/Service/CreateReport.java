@@ -21,6 +21,8 @@ public class CreateReport {
                 break;
             case 3:
                 status = "ошибка во время обработки, невалидный номер счета " + invalidNumber;
+            case 4:
+                status = "ошибка во время обработки, несуществующий номер: " + invalidNumber;
         }
 
         String reportEntry = dateTime + " | " + fileName + " | " + transferInfo + " | " + status;

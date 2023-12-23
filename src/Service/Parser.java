@@ -1,48 +1,32 @@
 package Service;
 
-import Exceptions.InvalidTransferException;
-import Models.Account;
 import Models.Transfer;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class Parser {
     private static final String INPUT = "D:\\Courses\\MoneyTransferProgramm\\src\\input";
     private static final String ARCHIVE = "D:\\Courses\\MoneyTransferProgramm\\src\\archive";
     private static final String ACCOUNTS = "D:\\Courses\\MoneyTransferProgramm\\src\\accounts.txt";
-
     private static final String REPORT = "D:\\Courses\\MoneyTransferProgramm\\src\\report.txt";
 
-
     private Map<String, Double> accounts = new HashMap<>();
-    private List<Transfer> transfers;
 
     public void readAccount() {
-      /*  File input = new File(INPUT);
-        File[] files = input.listFiles();
-
-        if (files != null){
-            for (File file : files){
-                if (file.isFile() && file.getName().endsWith(".txt")){*/
-
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ACCOUNTS))) {
             String line = "";
             String[] parts;
@@ -56,7 +40,6 @@ public class Parser {
                     }
                 }
             }
-            System.out.println(accounts);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -80,41 +63,51 @@ public class Parser {
                                 String toAccountNumber = parts[1];
                                 Double amount = Double.valueOf(parts[2]);
 
+                                if (!accounts.containsKey(fromAccountNumber)) {
+                                    CreateReport.createReport(file.getName(), line, fromAccountNumber, 4);
+                                    continue;
+                                }
+                                if (!accounts.containsKey(toAccountNumber)) {
+                                    CreateReport.createReport(file.getName(), line, toAccountNumber, 4);
+                                    continue;
+                                }
+                                if (amount <= 0) {
+                                    CreateReport.createReport(file.getName(), line, "", 2);
+                                    continue;
+                                }
                                 if (!isValidAccountNumber(fromAccountNumber)) {
-                                    CreateReport.createReport(file.getName(), line , fromAccountNumber, 3);
+                                    CreateReport.createReport(file.getName(), line, fromAccountNumber, 3);
                                     continue;
                                 }
-                                if (!isValidAccountNumber(toAccountNumber)){
-                                    CreateReport.createReport(file.getName(), line,toAccountNumber,3);
+                                if (!isValidAccountNumber(toAccountNumber)) {
+                                    CreateReport.createReport(file.getName(), line, toAccountNumber, 3);
                                     continue;
                                 }
-                                Double a = accounts.get(fromAccountNumber);
-                                if (a < amount) {
-                                  CreateReport.createReport(file.getName(), line,"",2);
-                                  continue;
+                                if (accounts.get(fromAccountNumber) < amount) {
+                                    CreateReport.createReport(file.getName(), line, "", 2);
+                                    continue;
                                 }
 
                                 accounts.put(fromAccountNumber, accounts.get(fromAccountNumber) - amount);
-                                System.out.println(accounts);
-                              Double r = accounts.get(toAccountNumber) + amount;
-                                accounts.put(toAccountNumber,r);
-                                System.out.println(accounts);
+                                accounts.put(toAccountNumber, accounts.get(toAccountNumber) + amount);
 
-
-                                CreateReport.createReport(file.getName(), line,"",1);
+                                CreateReport.createReport(file.getName(), line, "", 1);
                             }
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }
+                moveFileToArchive(file);
             }
-
-        }
-        try(BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(ACCOUNTS))){
-            bufferedWriter.write(accounts.toString());
-        }catch (IOException e){
-            System.out.println(e);
+            try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(ACCOUNTS))) {
+                Set<String> numbers = accounts.keySet();
+                for (String number : numbers) {
+                    bufferedWriter.write(number + " " + accounts.get(number) + "\n");
+                }
+            } catch (IOException e) {
+                System.out.println(e);
+            }
         }
     }
 
@@ -133,22 +126,4 @@ public class Parser {
         String regex = "\\d{5}-\\d{5}";
         return Pattern.matches(regex, accountNumber);
     }
-
-   /* private Account getAccount(String accountNumber) {
-        Account account = new Account(accountNumber);
-        return account;
-    }*/
-
-    /*private List<File> findInput(){
-        File input = new File(INPUT);
-        List<File> inputFiles = new ArrayList<>();
-        if (input.exists() && input.isDirectory()){
-            for (File file : input.listFiles()){
-                if (file.isFile() && file.getName().endsWith(".txt")){
-                    inputFiles.add(file);
-                }
-            }
-        }
-        return inputFiles;
-    }*/
 }

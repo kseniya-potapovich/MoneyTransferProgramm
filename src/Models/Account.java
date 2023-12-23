@@ -1,16 +1,11 @@
 package Models;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
 public class Account {
     private String number;
-    private int amount;
+    private double amount;
 
-    public Account(String number, int amount) {
+    public Account(String number, double amount) {
         this.number = number;
-        this.amount = amount;
     }
 
     public String getNumber() {
@@ -21,11 +16,11 @@ public class Account {
         this.number = number;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public double setAmount(double amount) {
+        return amount;
     }
 }

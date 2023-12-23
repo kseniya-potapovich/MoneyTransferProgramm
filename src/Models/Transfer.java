@@ -3,37 +3,27 @@ package Models;
 import java.time.LocalDateTime;
 
 public class Transfer {
-    private String fileName;
-    private String status;
-    private LocalDateTime dateTime;
+    private String fromAccountNumber;
+    private String toAccountNumber;
+    private int amount;
 
-    public Transfer(String fileName, String status, LocalDateTime dateTime) {
-        this.fileName = fileName;
-        this.status = status;
-        this.dateTime = dateTime;
+    public Transfer(String fromAccountNumber, String toAccountNumber, int amount) {
+        this.fromAccountNumber = fromAccountNumber;
+        this.toAccountNumber = toAccountNumber;
+        this.amount = amount;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getFromAccountNumber() {
+        return fromAccountNumber;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public String getToAccountNumber() {
+        return toAccountNumber;
     }
 
-    public String getStatus() {
-        return status;
+    public int getAmount() {
+        return amount;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
 }

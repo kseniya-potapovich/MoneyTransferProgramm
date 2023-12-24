@@ -1,6 +1,6 @@
 package Service;
 
-import Models.Transfer;
+import util.StatusCode;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -22,7 +21,7 @@ public class Parser {
     private static final String INPUT = "D:\\Courses\\MoneyTransferProgramm\\src\\input";
     private static final String ARCHIVE = "D:\\Courses\\MoneyTransferProgramm\\src\\archive";
     private static final String ACCOUNTS = "D:\\Courses\\MoneyTransferProgramm\\src\\accounts.txt";
-    private static final String REPORT = "D:\\Courses\\MoneyTransferProgramm\\src\\report.txt";
+    private static final String regex = "\\d{5}-\\d{5}";
 
     private Map<String, Double> accounts = new HashMap<>();
 
@@ -41,14 +40,15 @@ public class Parser {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Ошибка при чтении файла с номерами счетов " + e.getMessage());
         }
     }
 
-    public void parse() throws IOException {
+    public void parse() {
         readAccount();
         File input = new File(INPUT);
         File[] files = input.listFiles();
+        CreateReport createReport = new CreateReport();
 
         if (files != null) {
             for (File file : files) {
@@ -63,39 +63,17 @@ public class Parser {
                                 String toAccountNumber = parts[1];
                                 Double amount = Double.valueOf(parts[2]);
 
-                                if (!accounts.containsKey(fromAccountNumber)) {
-                                    CreateReport.createReport(file.getName(), line, fromAccountNumber, 4);
-                                    continue;
-                                }
-                                if (!accounts.containsKey(toAccountNumber)) {
-                                    CreateReport.createReport(file.getName(), line, toAccountNumber, 4);
-                                    continue;
-                                }
-                                if (amount <= 0) {
-                                    CreateReport.createReport(file.getName(), line, "", 2);
-                                    continue;
-                                }
-                                if (!isValidAccountNumber(fromAccountNumber)) {
-                                    CreateReport.createReport(file.getName(), line, fromAccountNumber, 3);
-                                    continue;
-                                }
-                                if (!isValidAccountNumber(toAccountNumber)) {
-                                    CreateReport.createReport(file.getName(), line, toAccountNumber, 3);
-                                    continue;
-                                }
-                                if (accounts.get(fromAccountNumber) < amount) {
-                                    CreateReport.createReport(file.getName(), line, "", 2);
-                                    continue;
-                                }
+                                StatusCode statusCode = validate(fromAccountNumber, toAccountNumber, amount);
 
-                                accounts.put(fromAccountNumber, accounts.get(fromAccountNumber) - amount);
-                                accounts.put(toAccountNumber, accounts.get(toAccountNumber) + amount);
-
-                                CreateReport.createReport(file.getName(), line, "", 1);
+                                if (statusCode == StatusCode.OK) {
+                                    accounts.put(fromAccountNumber, accounts.get(fromAccountNumber) - amount);
+                                    accounts.put(toAccountNumber, accounts.get(toAccountNumber) + amount);
+                                }
+                                createReport.createReport(file.getName(), line, statusCode);
                             }
                         }
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        System.out.println("Ошибка при парсинге папки input " + e.getMessage());
                     }
                 }
                 moveFileToArchive(file);
@@ -106,24 +84,44 @@ public class Parser {
                     bufferedWriter.write(number + " " + accounts.get(number) + "\n");
                 }
             } catch (IOException e) {
-                System.out.println(e);
+                System.out.println("Ошибка при обновлении файла с номерами счетов " + e.getMessage());
             }
         }
     }
 
-    private static void moveFileToArchive(File file) {
+    private void moveFileToArchive(File file) {
         try {
             Path sourcePath = file.toPath();
             Path targetPath = Path.of(ARCHIVE, file.getName());
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println("Ошибка при архифировании файлов " + e.getMessage());
         }
-
     }
 
-    private static boolean isValidAccountNumber(String accountNumber) {
-        String regex = "\\d{5}-\\d{5}";
+    private boolean isValidAccountNumber(String accountNumber) {
         return Pattern.matches(regex, accountNumber);
+    }
+
+    private StatusCode validate(String fromAccountNumber, String toAccountNumber, Double amount) {
+        if (!isValidAccountNumber(fromAccountNumber)) {
+            return StatusCode.INVALID_FROM_NUMBER;
+        }
+        if (!isValidAccountNumber(toAccountNumber)) {
+            return StatusCode.INVALID_TO_NUMBER;
+        }
+        if (!accounts.containsKey(fromAccountNumber)) {
+            return StatusCode.NON_EXISTENT_FROM_NUMBER;
+        }
+        if (!accounts.containsKey(toAccountNumber)) {
+            return StatusCode.NON_EXISTENT_TO_NUMBER;
+        }
+        if (accounts.get(fromAccountNumber) < amount) {
+            return StatusCode.NEGATIVE_AMOUNT;
+        }
+        if (amount <= 0) {
+            return StatusCode.INCORRECT_AMOUNT;
+        }
+        return StatusCode.OK;
     }
 }

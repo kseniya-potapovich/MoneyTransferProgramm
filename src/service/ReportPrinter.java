@@ -18,15 +18,6 @@ public class ReportPrinter {
     public void print() {
         String printReport = getReport();
         System.out.println(printReport);
-
-       /* try(BufferedReader bufferedReader = new BufferedReader(new FileReader(REPORT))){
-            String line = "";
-            while ((line = bufferedReader.readLine()) != null){
-                System.out.println(line);
-            }
-        }catch (IOException e){
-            System.out.println("Ошибка при чтении файла отчета " + e.getMessage());
-        }*/
     }
 
     /*public void printOnDate(LocalDate startDate, LocalDate endDate) {

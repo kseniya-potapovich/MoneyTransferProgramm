@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 import util.StatusCode;
 
@@ -8,12 +8,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class CreateReport {
+public class ReportCreator {
     private static final String REPORT = "report.txt";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public void createReport(String fileName, String transferInfo, StatusCode statusCode) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String dateTime = LocalDateTime.now().format(formatter);
+        String dateTime = LocalDateTime.now().format(FORMATTER);
         String status = "";
 
         switch (statusCode) {
@@ -34,7 +34,7 @@ public class CreateReport {
         }
 
         String reportEntry = dateTime + " | " + fileName + " | " + transferInfo + " | " + status;
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(REPORT, true))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(REPORT,true))) {
             writer.write(reportEntry);
             writer.newLine();
             writer.flush();

@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 import util.StatusCode;
 
@@ -24,31 +24,24 @@ public class Parser {
     private static final String regex = "\\d{5}-\\d{5}";
 
     private Map<String, Double> accounts = new HashMap<>();
+    private ReportCreator creator = new ReportCreator();
 
-    public void readAccount() {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ACCOUNTS))) {
-            String line = "";
-            String[] parts;
-            while ((line = bufferedReader.readLine()) != null) {
-                parts = line.split(" ");
-                if (parts.length == 2) {
-                    for (int j = 0; j < parts.length; j += 2) {
-                        String number = parts[j];
-                        Double amount = Double.valueOf(parts[j + 1]);
-                        accounts.put(number, amount);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Ошибка при чтении файла с номерами счетов " + e.getMessage());
-        }
+    private static Parser instance;
+
+    private Parser() {
     }
 
+    public static Parser getInstance() {
+        if (instance == null) {
+            instance = new Parser();
+        }
+        return instance;
+    }
     public void parse() {
         readAccount();
         File input = new File(INPUT);
         File[] files = input.listFiles();
-        CreateReport createReport = new CreateReport();
+
 
         if (files != null) {
             for (File file : files) {
@@ -69,7 +62,7 @@ public class Parser {
                                     accounts.put(fromAccountNumber, accounts.get(fromAccountNumber) - amount);
                                     accounts.put(toAccountNumber, accounts.get(toAccountNumber) + amount);
                                 }
-                                createReport.createReport(file.getName(), line, statusCode);
+                                creator.createReport(file.getName(), line, statusCode);
                             }
                         }
                     } catch (IOException e) {
@@ -86,6 +79,25 @@ public class Parser {
             } catch (IOException e) {
                 System.out.println("Ошибка при обновлении файла с номерами счетов " + e.getMessage());
             }
+        }
+    }
+
+    public void readAccount() {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(ACCOUNTS))) {
+            String line = "";
+            String[] parts;
+            while ((line = bufferedReader.readLine()) != null) {
+                parts = line.split(" ");
+                if (parts.length == 2) {
+                    for (int j = 0; j < parts.length; j += 2) {
+                        String number = parts[j];
+                        Double amount = Double.valueOf(parts[j + 1]);
+                        accounts.put(number, amount);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Ошибка при чтении файла с номерами счетов " + e.getMessage());
         }
     }
 

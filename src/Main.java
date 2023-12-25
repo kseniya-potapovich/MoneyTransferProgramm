@@ -1,11 +1,15 @@
-import Service.Parser;
-import Service.WriteReport;
+import service.Parser;
+import service.ReportPrinter;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
-    static Parser parser = new Parser();
+    static Parser parser = Parser.getInstance();
+    static ReportPrinter printer = new ReportPrinter();
 
     public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
@@ -14,11 +18,12 @@ public class Main {
         System.out.println("Укажите желаемую операцию: ");
         int operation = scanner.nextInt();
 
-        switch (operation) {
-            case 1:
-                parser.parse();
-            case 2:
-               WriteReport.print();
+        if (operation == 1) {
+            parser.parse();
+        } else if (operation == 2) {
+            printer.print();
+        } else {
+            System.out.println("Неверно введена команда");
         }
     }
 }

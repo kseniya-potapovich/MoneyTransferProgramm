@@ -1,6 +1,4 @@
-package Models;
-
-import java.time.LocalDateTime;
+package models;
 
 public class Transfer {
     private String fromAccountNumber;
